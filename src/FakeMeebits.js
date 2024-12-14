@@ -1,107 +1,108 @@
 import React, { useState, useEffect } from 'react';
 import { ethers } from 'ethers';
 import importedJson2 from '../src/artifacts/contracts/FakeMeebitsClaimer.sol/FakeMeebitsClaimer.json';
-import signatureData from "../src/artifacts/signatures/output-sig.json"; // Import the signature file
+import signatureData from "../src/artifacts/signatures/output-sig.json"; // Import signature data
 
-const contractAddress = "0x9B6F990793347005bb8a252A67F0FA4d56521447";
+const contractAddress = "0x9B6F990793347005bb8a252A67F0FA4d56521447"; // FakeMeebitsClaimer contract address
 const contractABI = importedJson2["abi"];
 
 const FakeMeebits = () => {
-    const [tokenId, setTokenId] = useState("");
-    const [message, setMessage] = useState("");
-    const [loading, setLoading] = useState(false);
-    const [isClaimed, setIsClaimed] = useState(null);
-  
+    const [tokenId, setTokenId] = useState(""); // State to store token ID
+    const [message, setMessage] = useState(""); // State to store messages for user
+    const [loading, setLoading] = useState(false); // State to handle loading state
+    const [isClaimed, setIsClaimed] = useState(null); // State to track if token is claimed
+
+    // Function to check if token is already claimed
     const checkTokenStatus = async () => {
-      if (!tokenId || isNaN(tokenId) || tokenId < 0 || tokenId > 19999) {
-        setMessage("Please enter a valid Token ID (0-19999).");
-        return;
-      }
-  
-      try {
-        if (typeof window.ethereum === "undefined") {
-          setMessage("MetaMask is not installed.");
-          return;
+        if (!tokenId || isNaN(tokenId) || tokenId < 0 || tokenId > 19999) {
+            setMessage("Please enter a valid Token ID (0-19999).");
+            return;
         }
-  
-        setLoading(true);
-        setMessage("");
-  
-        const provider = new ethers.BrowserProvider(window.ethereum);
-        const contract = new ethers.Contract(contractAddress,contractABI,provider);
-  
-        // Check if the token has already been claimed
-        const claimed = await contract.tokensThatWereClaimed(tokenId);
-        setIsClaimed(claimed);
-  
-        if (claimed) {
-          setMessage(`Token ${tokenId} has already been minted.` );
-        } else {
-          setMessage(`Token ${tokenId} is available to claim.`);
+
+        try {
+            if (typeof window.ethereum === "undefined") {
+                setMessage("MetaMask is not installed.");
+                return;
+            }
+
+            setLoading(true);
+            setMessage("");
+
+            const provider = new ethers.BrowserProvider(window.ethereum);
+            const contract = new ethers.Contract(contractAddress, contractABI, provider);
+
+            // Check if the token has already been claimed
+            const claimed = await contract.tokensThatWereClaimed(tokenId);
+            setIsClaimed(claimed);
+
+            if (claimed) {
+                setMessage(`Token ${tokenId} has already been minted.`);
+            } else {
+                setMessage(`Token ${tokenId} is available to claim.`);
+            }
+        } catch (err) {
+            console.error(err);
+            setMessage(err.message || "An error occurred while checking the token status.");
+        } finally {
+            setLoading(false);
         }
-      } catch (err) {
-        console.error(err);
-        setMessage(err.message || "An error occurred while checking the token status.");
-      } finally {
-        setLoading(false);
-      }
     };
-  
+
+    // Function to claim the token
     const claimToken = async () => {
-      if (!tokenId || isNaN(tokenId) || tokenId < 0 || tokenId > 19999) {
-        setMessage("Please select a valid Token ID (0-19999).");
-        return;
-      }
-  
-      if (isClaimed) {
-        setMessage(`Token ${tokenId} has already been minted.`);
-        return;
-      }
-  
-      try {
-        if (typeof window.ethereum === "undefined") {
-          setMessage("MetaMask is not installed.");
-          return;
+        if (!tokenId || isNaN(tokenId) || tokenId < 0 || tokenId > 19999) {
+            setMessage("Please select a valid Token ID (0-19999).");
+            return;
         }
-  
-        setLoading(true);
-  
-        // Find the correct signature for the token ID from the JSON file
-        const signatureEntry = signatureData.find(
-          (entry) => entry.tokenNumber === Number(tokenId)
-        );
-  
-        if (!signatureEntry) {
-          setMessage("Signature not found for the selected Token ID.");
-          return;
+
+        if (isClaimed) {
+            setMessage(`Token ${tokenId} has already been minted.`);
+            return;
         }
-  
-        const signature = signatureEntry.signature;
-  
-        // Connect to the contract
-        const provider = new ethers.BrowserProvider(window.ethereum);
-        const signer = await provider.getSigner();
-        const contract = new ethers.Contract(contractAddress,contractABI,signer);
-  
-        // Claim the token
-        const tx = await contract.claimAToken(tokenId, signature);
-        await tx.wait();
-  
-        setMessage(`Token ${tokenId} claimed successfully!`);
-        setIsClaimed(true);
-      } catch (err) {
-        console.error(err);
-        setMessage(err.message || "An error occurred while claiming the token.");
-      } finally {
-        setLoading(false);
-      }
+
+        try {
+            if (typeof window.ethereum === "undefined") {
+                setMessage("MetaMask is not installed.");
+                return;
+            }
+
+            setLoading(true);
+
+            // Find the correct signature for the token ID from the JSON file
+            const signatureEntry = signatureData.find(
+                (entry) => entry.tokenNumber === Number(tokenId)
+            );
+
+            if (!signatureEntry) {
+                setMessage("Signature not found for the selected Token ID.");
+                return;
+            }
+
+            const signature = signatureEntry.signature;
+
+            // Connect to the contract
+            const provider = new ethers.BrowserProvider(window.ethereum);
+            const signer = await provider.getSigner();
+            const contract = new ethers.Contract(contractAddress, contractABI, signer);
+
+            // Claim the token
+            const tx = await contract.claimAToken(tokenId, signature);
+            await tx.wait();
+
+            setMessage(`Token ${tokenId} claimed successfully!`);
+            setIsClaimed(true);
+        } catch (err) {
+            console.error(err);
+            setMessage(err.message || "An error occurred while claiming the token.");
+        } finally {
+            setLoading(false);
+        }
     };
-  
 
     return (
         <div style={{ padding: "20px", maxWidth: "600px", margin: "auto" }}>
             <h1>Fake Meebits</h1>
-            <p>Enter the Token ID you wish to check or claim.</p>
+            <p>Enter the token ID you wish to check or claim.</p>
 
             <div style={{ marginBottom: "20px" }}>
                 <label htmlFor="tokenIdInput" style={{ display: "block", marginBottom: "10px" }}>
@@ -117,10 +118,10 @@ const FakeMeebits = () => {
                         fontSize: "16px",
                         width: "100%",
                         marginBottom: "10px",
-                        border: "1px solid #ccc",
+                        border: "2px solid #007bff",
                         borderRadius: "4px",
                     }}
-                    placeholder="Enter Token ID"
+                    placeholder="Enter token ID"
                 />
             </div>
 
@@ -139,7 +140,7 @@ const FakeMeebits = () => {
                         marginRight: "10px",
                     }}
                 >
-                    {loading ? "Checking..." : "Check Token Status"}
+                    {loading ? "Checking..." : "Check token status"}
                 </button>
                 <button
                     onClick={claimToken}
@@ -154,7 +155,7 @@ const FakeMeebits = () => {
                         cursor: isClaimed || loading ? "not-allowed" : "pointer",
                     }}
                 >
-                    {loading ? "Claiming..." : "Claim Token"}
+                    {loading ? "Claiming..." : "Claim token"}
                 </button>
             </div>
 

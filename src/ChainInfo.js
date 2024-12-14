@@ -1,14 +1,16 @@
 import React, { useState, useEffect } from "react";
 import { ethers } from "ethers";
-import { useNavigate } from "react-router-dom"; // Importation de useNavigate
+import { useNavigate } from "react-router-dom"; 
 
+// ChainInfo component to display information about the chain, block, and user address
 const ChainInfo = () => {
   const [chainId, setChainId] = useState(null);
   const [blockNumber, setBlockNumber] = useState(null);
   const [userAddress, setUserAddress] = useState(null);
   const [error, setError] = useState("");
-  const navigate = useNavigate(); // Hook de navigation pour la redirection
+  const navigate = useNavigate(); 
 
+  // Function to connect to Metamask and retrieve network info
   const connectMetamask = async () => {
     try {
       if (!window.ethereum) {
@@ -21,10 +23,8 @@ const ChainInfo = () => {
       const network = await provider.getNetwork();
       console.log(network)
 
-      // Vérifier si le chainId correspond à celui de Holesky ()
       if (network.chainId.toString() !== "17000") {
-        // Rediriger vers la page d'erreur si ce n'est pas Holesky
-        navigate("/error");
+        navigate("/error"); // Navigate to error page if wrong network
         return;
       }
 
@@ -42,7 +42,7 @@ const ChainInfo = () => {
   };
 
   useEffect(() => {
-    connectMetamask();
+    connectMetamask(); // Connect to Metamask on component mount
   }, []);
 
   return (
@@ -52,8 +52,8 @@ const ChainInfo = () => {
       {!error && (
         <div>
           <p><strong>Chain ID:</strong> {chainId ? chainId : "Loading..."}</p>
-          <p><strong>Last Block Number:</strong> {blockNumber ? blockNumber : "Loading..."}</p>
-          <p><strong>User Address:</strong> {userAddress ? userAddress : "Loading..."}</p>
+          <p><strong>Last block number:</strong> {blockNumber ? blockNumber : "Loading..."}</p>
+          <p><strong>User address:</strong> {userAddress ? userAddress : "Loading..."}</p>
         </div>
       )}
     </div>

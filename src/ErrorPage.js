@@ -1,5 +1,6 @@
 import React from "react";
 
+// ErrorPage component to display an error message
 const ErrorPage = () => {
   return (
     <div style={{ padding: "20px", textAlign: "center", color: "red" }}>

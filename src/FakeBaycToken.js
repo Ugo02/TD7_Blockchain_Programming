@@ -4,21 +4,19 @@ import { ethers } from 'ethers';
 import importedJson from '../src/artifacts/contracts/FakeBAYC.sol/FakeBAYC.json';
 
 function FakeBaycToken() {
-  const { tokenId } = useParams(); // Récupère le tokenId depuis l'URL
+  const { tokenId } = useParams(); // Retrieve tokenId from URL
   const [metadata, setMetadata] = useState(null);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  const CONTRACT_ADDRESS = "0xdecFAB04fb08cC5da6365C18B26A6B9b1D4BEDFE"; // Adresse du contrat
+  const CONTRACT_ADDRESS = "0xdecFAB04fb08cC5da6365C18B26A6B9b1D4BEDFE"; // FakeBAYC contract address
   const ABI = importedJson["abi"];
 
+  // Function to fetch metadata for a token
   const fetchTokenMetadata = async () => {
     try {
-      console.log("Fetching metadata for token ID:", tokenId); // Log du tokenId
-
       if (!window.ethereum) {
         setError("Metamask is not installed!");
-        console.error("Metamask is not installed!"); // Log si MetaMask n'est pas installé
         return;
       }
 
@@ -28,46 +26,47 @@ function FakeBaycToken() {
       setLoading(true);
       setError(null);
 
-      // Appeler tokenURI(tokenId) pour obtenir l'URI des métadonnées
+      // Get the token's metadata URI
       const tokenUri = await contract.tokenURI(tokenId);
 
-      // Faire une requête HTTP à l'URI récupéré
+      // Fetch metadata from the URI
       const response = await fetch(tokenUri);
-
       if (!response.ok) {
         throw new Error(`Failed to fetch metadata from URI: ${tokenUri}`);
       }
 
       const data = await response.json();
-      // Mettre à jour les données de métadonnées
       setMetadata(data);
       setLoading(false);
     } catch (err) {
-      console.error("Error fetching token metadata:", err); // Log de l'erreur
+      setLoading(false);
+      // Handle errors based on the error message
       if (err.message.includes("invalid token ID") || err.message.includes("revert")) {
         setError(`Token #${tokenId} does not exist.`);
       } else {
         setError("An error occurred while fetching token metadata.");
       }
-      setLoading(false);
     }
   };
 
+  // Fetch metadata whenever the tokenId changes
+  useEffect(() => {
+    if (tokenId) {
+      fetchTokenMetadata();
+    }
+  }, [tokenId]);
+
+  // Helper function to resolve IPFS URLs
   function resolveIpfsUrl(ipfsUrl) {
     if (ipfsUrl.startsWith("ipfs://")) {
       return ipfsUrl.replace("ipfs://", "https://ipfs.io/ipfs/");
     }
     return ipfsUrl;
   }
-  
-
-  useEffect(() => {
-    fetchTokenMetadata();
-  }, [tokenId]);
 
   return (
     <div>
-      <h1>Token Details for #{tokenId}</h1>
+      <h1>Token details for {tokenId}</h1>
       {loading && <p>Loading...</p>}
       {error && <p style={{ color: "red" }}>{error}</p>}
       {metadata && (

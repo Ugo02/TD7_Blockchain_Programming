@@ -15,17 +15,61 @@
 
 .App-header {
   background-color: #282c34;
-  min-height: 100vh;
   display: flex;
-  flex-direction: column;
-  align-items: center;
   justify-content: center;
-  font-size: calc(10px + 2vmin);
+  align-items: center;
+  height: 60px; /* Navigation bar height */
+  font-size: 16px;
   color: white;
+  position: fixed; /* Fixes the navbar at the top */
+  top: 0;
+  left: 0;
+  width: 100%; /* Full width of the page */
+  z-index: 1000; /* Ensures the navbar is above the content */
 }
 
-.App-link {
-  color: #61dafb;
+nav {
+  width: 100%;
+}
+
+.nav-list {
+  display: flex; /* Horizontal layout of the nav items */
+  justify-content: center;
+  list-style: none; /* Removes list bullets */
+  padding: 0;
+  margin: 0;
+}
+
+.nav-list li {
+  margin: 0 15px; /* Spacing between menu items */
+}
+
+.nav-link {
+  color: white;
+  text-decoration: none;
+  font-size: 18px;
+  font-weight: normal;
+  padding: 10px 20px;
+  transition: background-color 0.3s ease, color 0.3s ease; /* Smooth transition for hover effect */
+}
+
+.nav-link:hover {
+  background-color: #007bff;
+  color: white;
+  border-radius: 5px; /* Round the corners when hovered */
+}
+
+.App-content {
+  padding-top: 60px; /* Adds space to prevent content being hidden by the navbar */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh; /* Ensures content fills the viewport height */
+  background-color: #f0f0f0; /* Light background color */
+  font-size: calc(10px + 2vmin);
+  color: black;
+  flex-direction: column;
+  box-sizing: border-box; /* Includes padding and border in the element's total width and height */
 }
 
 @keyframes App-logo-spin {
@@ -33,6 +77,6 @@
     transform: rotate(0deg);
   }
   to {
-    transform: rotate(360deg);
+    transform: rotate(360deg); /* Spinning animation for the logo */
   }
 }

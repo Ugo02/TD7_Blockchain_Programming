@@ -3,23 +3,19 @@ import { useParams } from 'react-router-dom';
 import { ethers } from 'ethers';
 import importedJson from '../src/artifacts/contracts/FakeNefturians.sol/FakeNefturians.json';
 
-// Contract details
-const contractAddress = "0x92Da472BE336A517778B86D7982e5fde0C7993c1";
+const contractAddress = "0x92Da472BE336A517778B86D7982e5fde0C7993c1"; // FakeNefturians contract address
 const contractABI = importedJson["abi"];
 
 const FakeNefturiansUser = () => {
-  const { userAddress } = useParams(); // Retrieve user address from the route parameter
+  const { userAddress } = useParams(); // Get the user address from the URL params
 
   const [tokens, setTokens] = useState([]);
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState(null);
 
-  // Function to resolve IPFS URLs to HTTP URLs
+  // Resolve IPFS URLs to HTTP URLs
   const resolveIpfsUrl = (ipfsUrl) => {
-    if (ipfsUrl.startsWith("ipfs://")) {
-      return ipfsUrl.replace("ipfs://", "https://ipfs.io/ipfs/");
-    }
-    return ipfsUrl;
+    return ipfsUrl.startsWith("ipfs://") ? ipfsUrl.replace("ipfs://", "https://ipfs.io/ipfs/") : ipfsUrl;
   };
 
   useEffect(() => {
@@ -31,22 +27,19 @@ const FakeNefturiansUser = () => {
         const provider = new ethers.BrowserProvider(window.ethereum);
         const contract = new ethers.Contract(contractAddress, contractABI, provider);
 
-        // Get the number of tokens the user owns
+        // Get the number of tokens owned by the user
         const balance = await contract.balanceOf(userAddress);
         const tokenCount = ethers.toNumber(balance);
 
         const userTokens = [];
         for (let i = 0; i < tokenCount; i++) {
-          // Get the token ID for each token
           const tokenId = await contract.tokenOfOwnerByIndex(userAddress, i);
-
-          // Fetch metadata (e.g., name, description, image) from tokenURI
           const tokenURI = await contract.tokenURI(tokenId);
           const response = await fetch(resolveIpfsUrl(tokenURI));
           const metadata = await response.json();
 
           userTokens.push({
-            image: resolveIpfsUrl(metadata.image), // Resolve IPFS URL for the image
+            image: resolveIpfsUrl(metadata.image), // Resolve IPFS image URL
             name: metadata.name,
             description: metadata.description,
           });
@@ -55,7 +48,6 @@ const FakeNefturiansUser = () => {
         setTokens(userTokens);
         setErrorMessage(null);
       } catch (error) {
-        console.error("Error fetching user tokens:", error);
         setErrorMessage("An error occurred while fetching tokens.");
       } finally {
         setLoading(false);
@@ -77,11 +69,7 @@ const FakeNefturiansUser = () => {
           {tokens.map((token, index) => (
             <li key={index} style={{ marginBottom: "20px", padding: "10px", border: "1px solid #ccc", borderRadius: "5px" }}>
               {token.image && (
-                <img 
-                  src={token.image} 
-                  alt={`NFT Image`} 
-                  style={{ maxWidth: "300px", borderRadius: "10px" }}
-                />
+                <img src={token.image} alt={`NFT Image`} style={{ maxWidth: "300px", borderRadius: "10px" }} />
               )}
               <p><strong>Name:</strong> {token.name}</p>
               <p><strong>Description:</strong> {token.description}</p>
