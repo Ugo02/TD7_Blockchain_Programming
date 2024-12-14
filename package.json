@@ -41,6 +41,5 @@
   },
   "devDependencies": {
     "gh-pages": "^6.2.0"
-  },
-  "homepage": "https://Ugo02.github.io/TD7_Blockchain_Programming"
+  }
 }
